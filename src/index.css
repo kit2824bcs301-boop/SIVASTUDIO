@@ -1,0 +1,350 @@
+@import "tailwindcss";
+
+@theme {
+  --color-slate-950: #020617;
+  --color-slate-900: #0f172a;
+  --color-slate-800: #1e293b;
+  --color-slate-100: #f1f5f9;
+  --color-slate-400: #94a3b8;
+}
+
+/* Base Overrides for Frosted Glass Theme */
+body {
+  background-color: #0f172a !important;
+  color: #f1f5f9 !important;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Background gradient meshes */
+.bg-mesh-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.mesh-blob-1 {
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  width: 45%;
+  height: 45%;
+  background: rgba(59, 130, 246, 0.18);
+  border-radius: 50%;
+  filter: blur(120px);
+}
+
+.mesh-blob-2 {
+  position: absolute;
+  bottom: -10%;
+  right: -10%;
+  width: 55%;
+  height: 55%;
+  background: rgba(147, 51, 234, 0.15);
+  border-radius: 50%;
+  filter: blur(120px);
+}
+
+/* Content layer stack */
+.relative-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Glassmorphism Overrides */
+.card, .modal-content, .dropdown-menu {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(24px) saturate(120%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(120%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #f1f5f9 !important;
+  box-shadow: 0 15px 35px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Header Navbar */
+.navbar {
+  background: rgba(15, 23, 42, 0.6) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Form inputs & controls */
+input.form-control, select.form-select, textarea.form-control {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+  border-radius: 0.75rem !important;
+  transition: all 0.3s ease !important;
+}
+
+input.form-control:focus, select.form-select:focus, textarea.form-control:focus {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(59, 130, 246, 0.5) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
+  color: #ffffff !important;
+  outline: none !important;
+}
+
+input.form-control::placeholder, textarea.form-control::placeholder {
+  color: #64748b !important;
+}
+
+.input-group-text {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-right: none !important;
+  color: #94a3b8 !important;
+}
+
+/* Tables in Frosted Glass */
+.table {
+  --bs-table-bg: transparent !important;
+  color: #f1f5f9 !important;
+}
+
+.table th {
+  color: #94a3b8 !important;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.table td {
+  color: #e2e8f0 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+/* Buttons mapping */
+/* High quality blue button matching SECURE_NODE style */
+.btn-dark {
+  background: rgba(59, 130, 246, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+  backdrop-filter: blur(8px) !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.25) !important;
+  transition: all 0.25s ease !important;
+}
+
+.btn-dark:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 1) !important;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.45) !important;
+  transform: translateY(-1px);
+}
+
+.btn-dark:disabled {
+  opacity: 0.6 !important;
+  background: rgba(59, 130, 246, 0.4) !important;
+}
+
+/* Outline/Muted buttons mapping */
+.btn-outline-dark, .btn-outline-secondary {
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  color: #f1f5f9 !important;
+  backdrop-filter: blur(8px) !important;
+  transition: all 0.25s ease !important;
+}
+
+.btn-outline-dark:hover, .btn-outline-secondary:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+}
+
+.btn-light {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.btn-light:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+}
+
+/* Dropdown styling */
+.dropdown-menu {
+  background: rgba(15, 23, 42, 0.95) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.dropdown-item {
+  color: #e2e8f0 !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.dropdown-item:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+}
+
+/* Nav Pills/Tabs styling */
+.nav-pills {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding: 0.25rem !important;
+}
+
+.nav-pills .nav-link {
+  color: #94a3b8 !important;
+  transition: all 0.2s ease !important;
+}
+
+.nav-pills .nav-link:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.nav-pills .nav-link.active {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Alerts and Notices */
+.alert {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #f1f5f9 !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+.alert-danger {
+  border-left: 4px solid #ef4444 !important;
+  background: rgba(239, 68, 68, 0.08) !important;
+  border-color: rgba(239, 68, 68, 0.15) !important;
+  color: #fca5a5 !important;
+}
+
+.alert-success {
+  border-left: 4px solid #10b981 !important;
+  background: rgba(16, 185, 129, 0.08) !important;
+  border-color: rgba(16, 185, 129, 0.15) !important;
+  color: #6ee7b7 !important;
+}
+
+.alert-warning {
+  border-left: 4px solid #f59e0b !important;
+  background: rgba(245, 158, 11, 0.08) !important;
+  border-color: rgba(245, 158, 11, 0.15) !important;
+  color: #fcd34d !important;
+}
+
+.alert-info {
+  border-left: 4px solid #06b6d4 !important;
+  background: rgba(6, 182, 212, 0.08) !important;
+  border-color: rgba(6, 182, 212, 0.15) !important;
+  color: #67e8f9 !important;
+}
+
+/* Badges glowing */
+.badge {
+  font-weight: 600 !important;
+}
+
+.bg-dark {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+}
+
+.bg-light {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #e2e8f0 !important;
+}
+
+.bg-success {
+  background-color: rgba(16, 185, 129, 0.2) !important;
+  color: #10b981 !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+.bg-danger {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+}
+
+.bg-warning {
+  background-color: rgba(245, 158, 11, 0.2) !important;
+  color: #f59e0b !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+.bg-primary {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+  color: #60a5fa !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+.bg-info {
+  background-color: rgba(6, 182, 212, 0.2) !important;
+  color: #22d3ee !important;
+  border: 1px solid rgba(6, 182, 212, 0.3) !important;
+}
+
+/* Text glow / headers styling */
+h1, h2, h3, h4, h5, h6 {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+.text-dark {
+  color: #ffffff !important;
+}
+
+.text-muted {
+  color: #94a3b8 !important;
+}
+
+code {
+  color: #a78bfa !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  padding: 0.15rem 0.35rem !important;
+  border-radius: 0.25rem !important;
+  font-family: 'JetBrains Mono', monospace !important;
+}
+
+/* Scrollbars custom frosted style */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Spinner borders */
+.spinner-border {
+  --bs-spinner-border-width: 0.2em;
+  border-color: rgba(255, 255, 255, 0.15);
+  border-right-color: rgba(59, 130, 246, 0.85);
+}

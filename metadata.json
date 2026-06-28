@@ -1,0 +1,6 @@
+{
+  "name": "SHIVA STUDIO & PHOTOGRAPHY",
+  "description": "A secure, production-ready photography studio management platform featuring client booking, photo proofing with multi-layer screenshot protection, administrative insights, interactive analytics, and robust JWT-based security.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
