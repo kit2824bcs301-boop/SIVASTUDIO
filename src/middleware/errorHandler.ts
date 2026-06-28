@@ -71,9 +71,11 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
   }
 
   // Send Error Response
-  res.status(error.statusCode).json({
-    status: error.status,
-    message: error.message || 'An internal error occurred',
+  const finalStatusCode = error.statusCode || err.statusCode || 500;
+  const finalStatus = error.status || err.status || 'error';
+  res.status(finalStatusCode).json({
+    status: finalStatus,
+    message: error.message || err.message || 'An internal error occurred',
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
   });
 };
