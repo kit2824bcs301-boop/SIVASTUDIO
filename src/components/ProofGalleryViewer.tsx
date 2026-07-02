@@ -28,6 +28,43 @@ export default function ProofGalleryViewer({ accessToken, galleryId, onBack, isR
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
+  // Lightbox Active Image State
+  const [activeImageIdx, setActiveImageIdx] = useState<number | null>(null);
+
+  // Toggle selection/starred for a photo
+  const handleToggleStar = async (imageId: string, currentStarred: boolean) => {
+    if (isReadOnly) return;
+    try {
+      const res = await fetch(`/api/proofs/${galleryId}/star`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          imageId,
+          isStarred: !currentStarred
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to update selection.');
+
+      // Update local state
+      if (proof) {
+        const updatedImages = proof.images.map((img: any) => {
+          const id = (img._id || img.id || '').toString();
+          if (id === imageId.toString()) {
+            return { ...img, isStarred: !currentStarred };
+          }
+          return img;
+        });
+        setProof({ ...proof, images: updatedImages });
+      }
+    } catch (err: any) {
+      alert(err.message || 'Error updating selection');
+    }
+  };
+
   // Load selected gallery
   const loadGallery = async () => {
     setLoading(true);
@@ -59,6 +96,46 @@ export default function ProofGalleryViewer({ accessToken, galleryId, onBack, isR
   useEffect(() => {
     loadGallery();
   }, [galleryId, accessToken]);
+
+  // Keyboard navigation for Browser Photo Lightbox
+  useEffect(() => {
+    if (activeImageIdx === null || !proof) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setActiveImageIdx(null);
+      } else if (e.key === 'ArrowRight') {
+        let nextIdx = (activeImageIdx + 1) % proof.images.length;
+        let count = 0;
+        while (count < proof.images.length) {
+          const url = proof.images[nextIdx].url || '';
+          const ext = url.split('.').pop()?.split('?')[0]?.toLowerCase() || '';
+          if (['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(ext)) {
+            setActiveImageIdx(nextIdx);
+            break;
+          }
+          nextIdx = (nextIdx + 1) % proof.images.length;
+          count++;
+        }
+      } else if (e.key === 'ArrowLeft') {
+        let prevIdx = (activeImageIdx - 1 + proof.images.length) % proof.images.length;
+        let count = 0;
+        while (count < proof.images.length) {
+          const url = proof.images[prevIdx].url || '';
+          const ext = url.split('.').pop()?.split('?')[0]?.toLowerCase() || '';
+          if (['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(ext)) {
+            setActiveImageIdx(prevIdx);
+            break;
+          }
+          prevIdx = (prevIdx - 1 + proof.images.length) % proof.images.length;
+          count++;
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeImageIdx, proof]);
 
   // Report Intrusion to server API
   const reportScreenshotIntrusion = async () => {
@@ -299,9 +376,37 @@ export default function ProofGalleryViewer({ accessToken, galleryId, onBack, isR
                     )}
 
                     {/* Photo Label Bar */}
-                    <div className="bg-dark text-white p-2.5 d-flex justify-content-between align-items-center">
-                      <span className="text-xs fw-bold font-mono uppercase tracking-wider">Proof {idx + 1 < 10 ? `0${idx + 1}` : idx + 1} — {img.title}</span>
-                      <span className="badge bg-secondary text-white text-xxs">{ext.toUpperCase()} format</span>
+                    <div className="bg-dark text-white p-2.5 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+                      <div className="d-flex align-items-center gap-2">
+                        {isRenderable && (
+                          <button 
+                            type="button"
+                            className="btn btn-outline-light border-0 p-1 text-info d-flex align-items-center justify-content-center hover-bg-dark"
+                            onClick={() => setActiveImageIdx(idx)}
+                            title="View full photo in browser"
+                            style={{ width: '28px', height: '28px' }}
+                          >
+                            <i className="fa-solid fa-expand fs-6"></i>
+                          </button>
+                        )}
+                        <span className="text-xs fw-bold font-mono uppercase tracking-wider">Proof {idx + 1 < 10 ? `0${idx + 1}` : idx + 1} — {img.title}</span>
+                      </div>
+                      <div className="d-flex align-items-center gap-2 justify-content-between justify-content-sm-end">
+                        <button
+                          type="button"
+                          className={`btn btn-xs d-flex align-items-center gap-1.5 py-1 px-2.5 rounded-2 fw-bold transition-all text-xxs ${
+                            img.isStarred 
+                              ? 'btn-warning text-dark border-0 shadow-sm' 
+                              : 'btn-outline-secondary text-light border-secondary hover-bg-secondary'
+                          }`}
+                          onClick={() => handleToggleStar(img._id || img.id, img.isStarred || false)}
+                          disabled={isReadOnly}
+                        >
+                          <i className={`fa-star ${img.isStarred ? 'fa-solid text-dark animate-pulse' : 'fa-regular text-muted'}`}></i>
+                          {img.isStarred ? 'STARRED / PINNED' : 'SELECT PHOTO'}
+                        </button>
+                        <span className="badge bg-secondary text-white text-xxs">{ext.toUpperCase()} format</span>
+                      </div>
                     </div>
                   </div>
                 );
@@ -414,6 +519,129 @@ export default function ProofGalleryViewer({ accessToken, galleryId, onBack, isR
           </div>
         </div>
       </div>
+
+      {/* LIGHTBOX FOR FULL SCREEN BROWSER VIEWING WITH WATERMARK PROTECTION */}
+      {activeImageIdx !== null && proof && (
+        <div 
+          className="position-fixed top-0 start-0 w-100 h-100 bg-black bg-opacity-95 d-flex flex-column align-items-center justify-content-center" 
+          style={{ zIndex: 1050 }}
+          onContextMenu={e => {
+            if (proof.screenshotPrevention) {
+              e.preventDefault();
+              alert("🔒 Security Lock: Image saving is disabled inside the browser view.");
+              reportScreenshotIntrusion();
+            }
+          }}
+        >
+          {/* Lightbox Header Bar */}
+          <div className="position-absolute top-0 start-0 w-100 d-flex justify-content-between align-items-center p-3 text-white bg-dark bg-opacity-50">
+            <div>
+              <span className="fw-bold font-mono text-warning text-sm me-2">
+                [VIEWING SECURE IN-BROWSER]
+              </span>
+              <span className="text-xs text-light font-mono">
+                {activeImageIdx + 1} of {proof.images.length} — {proof.images[activeImageIdx].title}
+              </span>
+            </div>
+            <button 
+              type="button" 
+              className="btn btn-outline-light border-0 rounded-circle d-flex align-items-center justify-content-center" 
+              onClick={() => setActiveImageIdx(null)}
+              style={{ width: '40px', height: '40px' }}
+              title="Close Viewer (Esc)"
+            >
+              <i className="fa-solid fa-xmark fs-4"></i>
+            </button>
+          </div>
+
+          {/* Main Lightbox Content Area */}
+          <div className="position-relative d-flex align-items-center justify-content-center w-100 h-100 px-5">
+            
+            {/* Prev Button */}
+            <button 
+              type="button" 
+              className="btn btn-outline-light border-0 position-absolute start-0 ms-3 rounded-circle d-flex align-items-center justify-content-center bg-black bg-opacity-20 hover-bg-opacity-40"
+              style={{ width: '50px', height: '50px', zIndex: 1060 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                let prevIdx = (activeImageIdx - 1 + proof.images.length) % proof.images.length;
+                let count = 0;
+                while (count < proof.images.length) {
+                  const url = proof.images[prevIdx].url || '';
+                  const ext = url.split('.').pop()?.split('?')[0]?.toLowerCase() || '';
+                  if (['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(ext)) {
+                    setActiveImageIdx(prevIdx);
+                    break;
+                  }
+                  prevIdx = (prevIdx - 1 + proof.images.length) % proof.images.length;
+                  count++;
+                }
+              }}
+              title="Previous (Arrow Left)"
+            >
+              <i className="fa-solid fa-chevron-left fs-4"></i>
+            </button>
+
+            {/* Secure Watermarked Image Frame */}
+            <div className="position-relative overflow-hidden d-flex align-items-center justify-content-center" style={{ maxWidth: '90%', maxHeight: '80%' }}>
+              <img 
+                src={proof.images[activeImageIdx].url} 
+                className="img-fluid select-none pointer-events-none rounded border shadow-lg"
+                style={{ maxHeight: '80vh', objectFit: 'contain', pointerEvents: 'none' }}
+                referrerPolicy="no-referrer"
+                alt={proof.images[activeImageIdx].title}
+              />
+
+              {/* Diagonal security repeating watermark */}
+              {proof.screenshotPrevention && (
+                <div 
+                  className="position-absolute top-0 start-0 w-100 h-100 pointer-events-none d-flex flex-column justify-content-between p-4 overflow-hidden"
+                  style={{ zIndex: 1, mixBlendMode: 'difference' }}
+                >
+                  <div className="row h-100 w-100" style={{ transform: 'rotate(-25deg) scale(1.15)', opacity: 0.18, color: '#ffffff' }}>
+                    {[...Array(9)].map((_, i) => (
+                      <div className="col-4 text-center py-4 fw-bold font-mono text-xs whitespace-nowrap" key={i}>
+                        © AURA SECURE DIGITAL IN-BROWSER PROOF
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Next Button */}
+            <button 
+              type="button" 
+              className="btn btn-outline-light border-0 position-absolute end-0 me-3 rounded-circle d-flex align-items-center justify-content-center bg-black bg-opacity-20 hover-bg-opacity-40"
+              style={{ width: '50px', height: '50px', zIndex: 1060 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                let nextIdx = (activeImageIdx + 1) % proof.images.length;
+                let count = 0;
+                while (count < proof.images.length) {
+                  const url = proof.images[nextIdx].url || '';
+                  const ext = url.split('.').pop()?.split('?')[0]?.toLowerCase() || '';
+                  if (['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(ext)) {
+                    setActiveImageIdx(nextIdx);
+                    break;
+                  }
+                  nextIdx = (nextIdx + 1) % proof.images.length;
+                  count++;
+                }
+              }}
+              title="Next (Arrow Right)"
+            >
+              <i className="fa-solid fa-chevron-right fs-4"></i>
+            </button>
+
+          </div>
+
+          {/* Lightbox Footer Bar */}
+          <div className="position-absolute bottom-0 start-0 w-100 text-center p-3 text-muted text-xxs font-mono bg-dark bg-opacity-40">
+            ⚡ Multi-layer Screen Capturing Audits Enabled • Keyboard Controls: [← / →] Navigate, [Esc] Close
+          </div>
+        </div>
+      )}
     </div>
   );
 }

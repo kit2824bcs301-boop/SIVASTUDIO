@@ -174,6 +174,45 @@ router.post('/:id/screenshot-alert', protect, async (req: AuthenticatedRequest, 
   }
 });
 
+// 5.5. Toggle starred photo in proof gallery (Admin or Owner Client)
+router.patch('/:id/star', protect, async (req: AuthenticatedRequest, res: Response, next) => {
+  try {
+    if (!req.user) return next(new AppError('Unauthorized', 401));
+
+    const proof = await DBPhotoProof.findById(req.params.id);
+    if (!proof) {
+      return next(new AppError('Photo proof gallery not found.', 404));
+    }
+
+    if (req.user.role !== 'admin' && proof.clientEmail !== req.user.email) {
+      return next(new AppError('You do not have permission to modify this gallery.', 403));
+    }
+
+    const { imageId, isStarred } = req.body;
+    if (!imageId) {
+      return next(new AppError('Image ID is required.', 400));
+    }
+
+    // Update the image's isStarred field
+    const updatedImages = proof.images.map((img: any) => {
+      const id = (img._id || img.id || '').toString();
+      if (id === imageId.toString()) {
+        return { ...img, isStarred: !!isStarred };
+      }
+      return img;
+    });
+
+    await DBPhotoProof.findByIdAndUpdate(req.params.id, { images: updatedImages });
+
+    res.status(200).json({
+      status: 'success',
+      images: updatedImages
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // 6. Delete proof gallery (Admin Only)
 router.delete('/:id', protect, restrictTo('admin'), async (req: AuthenticatedRequest, res: Response, next) => {
   try {

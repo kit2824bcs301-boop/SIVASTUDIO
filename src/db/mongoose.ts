@@ -90,7 +90,8 @@ const photoProofSchema = new mongoose.Schema({
   images: [{
     url: { type: String, required: true },
     title: { type: String, required: true },
-    isWatermarked: { type: Boolean, default: true }
+    isWatermarked: { type: Boolean, default: true },
+    isStarred: { type: Boolean, default: false }
   }],
   status: { type: String, enum: ['Under Review', 'Approved', 'Revision Requested'], default: 'Under Review' },
   clientNotes: { type: String },

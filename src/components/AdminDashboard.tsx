@@ -54,6 +54,7 @@ export default function AdminDashboard({ accessToken }: AdminDashboardProps) {
   const [screenshotPrevention, setScreenshotPrevention] = useState(true);
   const [proofExpiryDays, setProofExpiryDays] = useState('30');
   const [proofSubmitLoading, setProofSubmitLoading] = useState(false);
+  const [expandedProofId, setExpandedProofId] = useState<string | null>(null);
 
   // Form States - Gallery Photo
   const [galleryFile, setGalleryFile] = useState<File | null>(null);
@@ -1194,9 +1195,62 @@ export default function AdminDashboard({ accessToken }: AdminDashboardProps) {
                             </span>
                           </div>
 
+                          {p.images && p.images.some((img: any) => img.isStarred) && (
+                            <div className="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-20 d-flex align-items-center gap-1 mb-2.5 py-1 px-2 rounded text-xxs">
+                              <i className="fa-solid fa-star text-warning animate-pulse"></i>
+                              <strong>{p.images.filter((img: any) => img.isStarred).length} Selected (Pinned)</strong> by Client
+                            </div>
+                          )}
+
                           {p.clientNotes && (
-                            <div className="bg-light p-2 rounded-2 text-xxs text-dark mb-3 italic">
+                            <div className="bg-light p-2 rounded-2 text-xxs text-dark mb-2.5 italic">
                               <strong>Client notes:</strong> "{p.clientNotes}"
+                            </div>
+                          )}
+
+                          <div className="mb-2.5">
+                            <button
+                              type="button"
+                              className="btn btn-link text-primary text-decoration-none p-0 text-xxs fw-bold d-flex align-items-center gap-1"
+                              onClick={() => setExpandedProofId(expandedProofId === (p._id || p.id) ? null : (p._id || p.id))}
+                            >
+                              <i className={`fa-solid ${expandedProofId === (p._id || p.id) ? 'fa-angle-up' : 'fa-angle-down'}`}></i>
+                              {expandedProofId === (p._id || p.id) ? 'Hide Gallery Photos' : 'View Gallery Photos & Stars'}
+                            </button>
+                          </div>
+
+                          {expandedProofId === (p._id || p.id) && (
+                            <div className="border rounded-2 p-2 bg-light mb-3 animate-fade-in" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                              <div className="d-flex flex-column gap-2">
+                                {p.images && p.images.length > 0 ? (
+                                  p.images.map((img: any, sIdx: number) => (
+                                    <div key={img._id || img.id || sIdx} className="d-flex align-items-center justify-content-between bg-white p-1.5 rounded border shadow-xs">
+                                      <div className="d-flex align-items-center gap-2">
+                                        <img 
+                                          src={img.url} 
+                                          className="rounded object-cover" 
+                                          style={{ width: '40px', height: '40px' }} 
+                                          referrerPolicy="no-referrer"
+                                          alt="" 
+                                        />
+                                        <div className="text-xxs truncate" style={{ maxWidth: '140px' }}>
+                                          <div className="fw-bold text-dark truncate">{img.title}</div>
+                                          <div className="text-muted text-xxs font-mono">{img.isWatermarked ? '🛡️ WATERMARKED' : 'ORIGINAL'}</div>
+                                        </div>
+                                      </div>
+                                      {img.isStarred ? (
+                                        <span className="badge bg-warning text-dark border border-warning border-opacity-30 d-flex align-items-center gap-1 text-xxs py-1 px-1.5 font-bold shadow-sm">
+                                          <i className="fa-solid fa-star text-warning animate-bounce"></i> PINNED / STARRED
+                                        </span>
+                                      ) : (
+                                        <span className="text-xxs text-muted italic">Not Selected</span>
+                                      )}
+                                    </div>
+                                  ))
+                                ) : (
+                                  <div className="text-muted text-center text-xxs py-2">No photos in this gallery</div>
+                                )}
+                              </div>
                             </div>
                           )}
 

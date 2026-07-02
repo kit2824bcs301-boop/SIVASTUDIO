@@ -32,6 +32,7 @@ export interface PhotoProofItem {
   url: string;
   title: string;
   isWatermarked: boolean;
+  isStarred?: boolean;
 }
 
 export interface PhotoProof {
